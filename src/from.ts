@@ -1,36 +1,80 @@
-import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
-import { buildPromise } from './utils';
+import {
+  asapScheduler,
+  asyncScheduler,
+  Observable,
+  queueScheduler,
+  scheduled,
+} from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
+import { buildPromiseTask, PromiseTask } from './utils';
 
 export async function* eachValueFrom<T>(
   obs$: Observable<T>
-): AsyncGenerator<T, boolean, never> {
-  let [promise, resolveFn, rejectFn] = buildPromise<T>();
+): AsyncGenerator<T, boolean, void> {
+  let taskQueue: PromiseTask<T>[] = [];
+  let index = 0;
+  const ready = buildPromiseTask<boolean>();
   let done = false;
 
-  obs$.pipe().subscribe({
-    next(value: T) {
-      resolveFn(value);
-    },
-    error(err: any) {
-      rejectFn(err);
-    },
-    complete() {
-      done = true;
-    },
-  });
-
-  while (true) {
-    const result = await promise;
-
-    yield result;
-
-    if (done) {
-      break;
+  const tick = () => {
+    if (!taskQueue.length) {
+      ready.resolveFn(true);
     }
 
-    [promise, resolveFn, rejectFn] = buildPromise<T>();
-  }
+    taskQueue.push(buildPromiseTask());
+  };
 
-  return true;
+  scheduled(obs$, queueScheduler)
+    .pipe(
+      tap(() => {
+        tick();
+      }),
+      catchError((err) => {
+        tick();
+
+        throw err;
+      })
+    )
+    .subscribe({
+      next(value: T) {
+        console.log('next');
+        taskQueue[index].resolveFn(value);
+        index++;
+      },
+      error(err: any) {
+        console.log('error');
+        taskQueue[index].rejectFn(err);
+        index++;
+      },
+      complete() {
+        console.log('complete');
+
+        if (!taskQueue.length) {
+          ready.resolveFn(true);
+        }
+
+        done = true;
+      },
+    });
+
+  while (true) {
+    if (!taskQueue.length && done) {
+      return done;
+    } else if (!taskQueue.length) {
+      console.log('await idle');
+      await ready.promise;
+
+      if (done) {
+        return done;
+      }
+
+      buildPromiseTask(ready);
+    }
+
+    console.log('await task');
+    const result = await taskQueue.shift()!.promise;
+
+    console.log('yield', result);
+    yield result;
+  }
 }
