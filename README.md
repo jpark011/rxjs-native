@@ -1,5 +1,7 @@
 # RxJS Native
 
+[![npm-version](https://img.shields.io/npm/v/rxjs-native?style=plastic)](https://www.npmjs.com/package/rxjs-native)
+
 Use [RxJS](https://rxjs.dev/) in native JavaScript!
 
 ### Install
