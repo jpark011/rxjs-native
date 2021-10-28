@@ -2,9 +2,12 @@
   "name": "rxjs-native",
   "version": "1.0.0",
   "description": "When RxJS meets async/await",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "repository": {
     "type": "git",
