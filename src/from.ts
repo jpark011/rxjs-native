@@ -1,6 +1,32 @@
 import { Observable, queueScheduler, scheduled } from 'rxjs';
 import { buildPromiseTask, PromiseTask } from './utils';
 
+/**
+ * Observable => async generator
+ *
+ * Pass an RxJS Observable and transform into an async generator,
+ * so that you can use them natively.
+ *
+ * Example:
+ *
+ * ```ts
+ * const list$ = from([1,2,3,4,5])
+ *
+ * for await (const value of eachValueFrom(list$)) {
+ *    console.log(value);
+ * }
+ *
+ * console.log('done!');
+ *
+ * ```
+ *
+ * CAUTION: If the `obs$` never completes, it will hang eternally.
+ *
+ * (like infinite loop)
+ *
+ * @param obs$ Observable to turn into an async generator
+ * @returns
+ */
 export async function* eachValueFrom<T>(
   obs$: Observable<T>
 ): AsyncGenerator<T, boolean, void> {
