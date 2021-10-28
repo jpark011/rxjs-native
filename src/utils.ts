@@ -4,7 +4,9 @@ export interface PromiseTask<T> {
   rejectFn: (err: any) => void;
 }
 
-export function buildPromiseTask<T>(task?: PromiseTask<T>): PromiseTask<T> {
+export function buildPromiseTask<T>(
+  task: PromiseTask<T> | null = null
+): PromiseTask<T> {
   let resolveFn!: (value: T) => void;
   let rejectFn!: (err: any) => void;
   let promise = new Promise<T>((resolve, reject) => {

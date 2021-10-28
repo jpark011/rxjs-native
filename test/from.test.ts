@@ -34,7 +34,7 @@ describe('from', () => {
       expect(true).toBeTruthy();
     });
 
-    test('observable with multiple value will emit a single value', async () => {
+    test('observable with multiple value will emit multiple value', async () => {
       const values = [1, 2, 3, 4];
       const obs$ = from(values);
       const result = [];
@@ -63,8 +63,9 @@ describe('from', () => {
       const values = [1, 2, 3, 4];
       const error = new Error('test');
       const obs$ = merge(
-        values,
-        throwError(() => error)
+        from(values),
+        throwError(() => error),
+        from(values)
       );
       const result = [];
 

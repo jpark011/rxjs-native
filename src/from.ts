@@ -1,80 +1,43 @@
-import {
-  asapScheduler,
-  asyncScheduler,
-  Observable,
-  queueScheduler,
-  scheduled,
-} from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { Observable, queueScheduler, scheduled } from 'rxjs';
 import { buildPromiseTask, PromiseTask } from './utils';
 
 export async function* eachValueFrom<T>(
   obs$: Observable<T>
 ): AsyncGenerator<T, boolean, void> {
   let taskQueue: PromiseTask<T>[] = [];
-  let index = 0;
-  const ready = buildPromiseTask<boolean>();
+  let ready: PromiseTask<void> | null = null;
   let done = false;
 
-  const tick = () => {
-    if (!taskQueue.length) {
-      ready.resolveFn(true);
-    }
+  scheduled(obs$, queueScheduler).subscribe({
+    next(value: T) {
+      const task = buildPromiseTask<T>();
 
-    taskQueue.push(buildPromiseTask());
-  };
+      task.resolveFn(value);
+      taskQueue.push(task);
+      ready?.resolveFn();
+    },
+    error(err: any) {
+      const task = buildPromiseTask<T>();
 
-  scheduled(obs$, queueScheduler)
-    .pipe(
-      tap(() => {
-        tick();
-      }),
-      catchError((err) => {
-        tick();
-
-        throw err;
-      })
-    )
-    .subscribe({
-      next(value: T) {
-        console.log('next');
-        taskQueue[index].resolveFn(value);
-        index++;
-      },
-      error(err: any) {
-        console.log('error');
-        taskQueue[index].rejectFn(err);
-        index++;
-      },
-      complete() {
-        console.log('complete');
-
-        if (!taskQueue.length) {
-          ready.resolveFn(true);
-        }
-
-        done = true;
-      },
-    });
+      task.rejectFn(err);
+      taskQueue.push(task);
+      ready?.resolveFn();
+    },
+    complete() {
+      done = true;
+      ready?.resolveFn();
+    },
+  });
 
   while (true) {
-    if (!taskQueue.length && done) {
+    if (taskQueue.length === 0 && done) {
       return done;
-    } else if (!taskQueue.length) {
-      console.log('await idle');
-      await ready.promise;
-
-      if (done) {
-        return done;
-      }
-
-      buildPromiseTask(ready);
+    } else if (taskQueue.length === 0) {
+      ready = buildPromiseTask<void>(ready);
     }
 
-    console.log('await task');
-    const result = await taskQueue.shift()!.promise;
+    await ready?.promise;
 
-    console.log('yield', result);
-    yield result;
+    yield await taskQueue.shift()!.promise;
   }
 }
