@@ -34,7 +34,7 @@ export async function* eachValueFrom<T>(
   let ready: PromiseTask<void> | null = null;
   let done = false;
 
-  scheduled(obs$, queueScheduler).subscribe({
+  const sub = scheduled(obs$, queueScheduler).subscribe({
     next(value: T) {
       const task = buildPromiseTask<T>();
 
@@ -55,15 +55,19 @@ export async function* eachValueFrom<T>(
     },
   });
 
-  while (true) {
-    if (taskQueue.length === 0 && done) {
-      return done;
-    } else if (taskQueue.length === 0) {
-      ready = buildPromiseTask<void>(ready);
+  try {
+    while (true) {
+      if (taskQueue.length === 0 && done) {
+        return done;
+      } else if (taskQueue.length === 0) {
+        ready = buildPromiseTask<void>(ready);
+      }
+
+      await ready?.promise;
+
+      yield await taskQueue.shift()!.promise;
     }
-
-    await ready?.promise;
-
-    yield await taskQueue.shift()!.promise;
+  } finally {
+    sub.unsubscribe();
   }
 }
