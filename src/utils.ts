@@ -1,3 +1,5 @@
+import { Subscriber } from 'rxjs';
+
 export interface PromiseTask<T> {
   promise: Promise<T>;
   resolveFn: (value: T) => void;
@@ -23,4 +25,19 @@ export function buildPromiseTask<T>(
   }
 
   return { promise, resolveFn, rejectFn };
+}
+
+export async function iterateValues<T>(
+  asyncGenerator: AsyncGenerator<T, boolean, void>,
+  subscriber: Subscriber<T>
+) {
+  try {
+    for await (const value of asyncGenerator) {
+      subscriber.next(value);
+    }
+  } catch (err) {
+    subscriber.error(err);
+  } finally {
+    subscriber.complete();
+  }
 }
