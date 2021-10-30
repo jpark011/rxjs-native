@@ -1,6 +1,6 @@
 {
   "name": "rxjs-native",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "When RxJS meets async/await",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
