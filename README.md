@@ -14,7 +14,7 @@ npm i --save rxjs rxjs-native
 
 ### Usage
 
-Use it with `for await` or as a plain [`async generator`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function*)
+Use it with [`for await`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for-await...of) or as a plain [`async generator`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function*)
 
 ```ts
 import { eachValueFrom } from 'rxjs-native';
