@@ -26,7 +26,7 @@ describe('to', () => {
     test('async generator with single value will emit a single value', (done) => {
       const value = 1;
       async function* test() {
-        yield value;
+        return value;
       }
 
       const obs$ = toObservable(test());
@@ -42,7 +42,9 @@ describe('to', () => {
     test('async generator with delayed value will emit multiple values', (done) => {
       const value = 1;
       async function* test() {
-        yield new Promise((resolve) => setTimeout(() => resolve(value), 100));
+        yield await new Promise((resolve) =>
+          setTimeout(() => resolve(value), 100)
+        );
       }
 
       const obs$ = toObservable(test());
