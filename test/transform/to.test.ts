@@ -1,6 +1,6 @@
 import { Subject } from 'rxjs';
 import { finalize, takeUntil, tap } from 'rxjs/operators';
-import { toObservable } from '../src';
+import { toObservable } from '../../src';
 
 describe('to', () => {
   describe('toObservable', () => {

@@ -1,5 +1,5 @@
 import { from, merge, of, throwError, timer } from 'rxjs';
-import { eachValueFrom } from '../src';
+import { eachValueFrom } from '../../src';
 
 describe('from', () => {
   describe('eachValueFrom', () => {

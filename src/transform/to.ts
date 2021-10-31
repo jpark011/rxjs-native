@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { iterateValues } from './utils';
+import { iterateValues } from '../utils';
 
 /**
  * @deprecated RxJS already supports this internally

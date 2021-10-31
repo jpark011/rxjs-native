@@ -1,5 +1,5 @@
 import { Observable, queueScheduler, scheduled } from 'rxjs';
-import { buildPromiseTask, PromiseTask } from './utils';
+import { buildPromiseTask, PromiseTask } from '../utils';
 
 /**
  * Observable => async generator
