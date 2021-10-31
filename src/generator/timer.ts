@@ -6,13 +6,17 @@ import { buildPromiseTask } from '../utils';
  * @param due timeout due in milliseconds (ms)
  * @returns
  */
-export async function* timer(due: number): AsyncGenerator<void> {
+export function timer(due: number): AsyncGenerator<void> {
   const task = buildPromiseTask<void>();
-
-  setTimeout(() => task.resolveFn(), due);
+  const timeout = setTimeout(() => {
+    task.resolveFn();
+  }, due);
 
   return (async function* () {
-    await task.promise;
-    yield;
+    try {
+      yield await task.promise;
+    } finally {
+      clearTimeout(timeout);
+    }
   })();
 }

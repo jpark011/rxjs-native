@@ -17,7 +17,7 @@ describe('timer', () => {
     expect(true).toBeTruthy();
   });
 
-  test('timer 0 will complete', async () => {
+  test('timer 1000 will complete', async () => {
     const due = 1000;
     const generator = timer(due);
 
